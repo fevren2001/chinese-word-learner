@@ -1,33 +1,27 @@
 # Chinese Word Learner
 
-An extension-only experiment for Myspoti. It keeps the vocabulary demo page and adds a diagnostic listener to find out whether tapping timed lyric words produces a playback seek event. It does not modify or fork Myspoti.
+An extension-only experiment for mapping lyric taps to word timestamps in Myspoti. It does not modify or fork Myspoti.
 
-## What this version does
+## Current experiment
 
-- Keeps the built-in six-word lookup page: 你好, 谢谢, 学习, 朋友, 音乐, 喜欢.
-- Logs playback seek events as `LYRIC_SEEK_TEST`, including the song and target position.
-- Makes no network requests and does not read or change your Spotify account.
+When you tap a timed lyric word, Myspoti seeks to its timestamp. This extension listens for seek events, reads Spotify's word-timed lyrics for that track, and logs the nearest timed word as `LYRIC_TAP_GUESS`.
 
-The seek listener is an experiment. Myspoti's current API documents seek events only when playback moves by more than three seconds. A lyric tap may move less than that, and the API does not directly tell extensions which lyric word was tapped.
+It also keeps the separate six-word sample lookup page, but that page is not the feature we are testing now.
 
-## Run the lyric-tap experiment
+## Try it
 
-1. Install the updated ZIP from file. Myspoti may ask you to accept the added **playback.events** action.
-2. Play a song with word-by-word lyrics. Tap a word whose timestamp is more than three seconds from the current playback position.
-3. Open this extension's log/details and look for a `LYRIC_SEEK_TEST` entry.
-4. Tap another word less than three seconds from the current position and check whether it produces an entry.
-5. Send me the entries—or tell me that none appeared. The result will show whether we can use seek position as a practical signal for a future word-meaning popup.
+1. Install this ZIP from file. Accept the added **spotify.catalog** action; the extension uses it to read Spotify's lyrics and word timings.
+2. Play a song with word-by-word lyrics and tap a word.
+3. Open the extension's logs. Find `LYRIC_TAP_GUESS` and check whether `word=` matches the word you tapped. Send me a few entries, including `deltaMs=`.
+4. If the log says `LYRIC_TAP_NO_WORD_TIMING`, Spotify did not return word timings for that track. If it says `LYRIC_TAP_LOOKUP_ERROR`, send that entry too.
 
-## Existing lookup page
+Myspoti documents seek events for jumps over three seconds, so use a word more than three seconds away from the current playback position for this test. The nearest-word match is only a hypothesis until we compare it with your taps.
 
-Open the extension's own page, enter `学习`, and tap **Look up**. It should show `xué xí — to study; to learn`. This checks the extension page bridge only; it does not add lookups to the lyrics screen.
+## What comes next
 
-## What would be needed next
-
-If lyric taps produce usable seek events, the extension would still need word timings for the exact lyrics shown to identify the selected word. If not, the current extension API has no direct callback for taps on lyric words. Either way, this diagnostic will tell us before we build further.
+If the guessed words match, the next version can look up meanings and show them in a short on-screen message. If the current screen's lyrics do not match Spotify's lyrics or the seek position is not close to the word time, we will adjust the matching approach first.
 
 ## References
 
 - [Myspoti extension template](https://github.com/kota-zo/myspoti-extension-template)
 - [Myspoti extension API](https://github.com/kota-zo/myspoti/blob/main/docs/extensions/API.md)
-- [Myspoti extension guide](https://github.com/kota-zo/myspoti/blob/main/docs/extensions/GUIDE.md)
