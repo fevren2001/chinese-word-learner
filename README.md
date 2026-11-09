@@ -1,40 +1,33 @@
 # Chinese Word Learner
 
-A small, extension-only vocabulary lookup experiment for Myspoti. It adds its own page; it does not modify or fork the Myspoti app.
+An extension-only experiment for Myspoti. It keeps the vocabulary demo page and adds a diagnostic listener to find out whether tapping timed lyric words produces a playback seek event. It does not modify or fork Myspoti.
 
-## What this prototype does
+## What this version does
 
-- Provides a page titled **Chinese Word Learner** with a built-in six-word sample dictionary.
-- Sends a lookup request from the page through Myspoti's page bridge to the extension's `message` hook.
-- Returns a matching pinyin and English gloss, or reports that the sample dictionary has no entry.
-- Uses no network access, storage, account access, or extra permissions.
+- Keeps the built-in six-word lookup page: 你好, 谢谢, 学习, 朋友, 音乐, 喜欢.
+- Logs playback seek events as `LYRIC_SEEK_TEST`, including the song and target position.
+- Makes no network requests and does not read or change your Spotify account.
 
-Sample entries: 你好, 谢谢, 学习, 朋友, 音乐, 喜欢.
+The seek listener is an experiment. Myspoti's current API documents seek events only when playback moves by more than three seconds. A lyric tap may move less than that, and the API does not directly tell extensions which lyric word was tapped.
 
-This is a bridge and page-loading experiment, not yet a full dictionary. It does not detect or respond to taps on words in Myspoti's existing lyrics screen.
+## Run the lyric-tap experiment
 
-## Install and try
+1. Install the updated ZIP from file. Myspoti may ask you to accept the added **playback.events** action.
+2. Play a song with word-by-word lyrics. Tap a word whose timestamp is more than three seconds from the current playback position.
+3. Open this extension's log/details and look for a `LYRIC_SEEK_TEST` entry.
+4. Tap another word less than three seconds from the current position and check whether it produces an entry.
+5. Send me the entries—or tell me that none appeared. The result will show whether we can use seek position as a practical signal for a future word-meaning popup.
 
-1. In Myspoti, open **Extensions** and choose **Install from an address**.
-2. Enter `https://github.com/fevren2001/chinese-word-learner`.
-3. Review and accept the requested **webview.page** action. Myspoti marks this capability as critical because it gives the extension its own page.
-4. Open the extension's page, leave or enter `学习`, and tap **Look up**. The page should show `xué xí — to study; to learn`.
-5. Try `你好` and an unknown word to check the other response paths.
+## Existing lookup page
 
-The current GitHub integration can commit files but cannot edit repository topics. To make it discoverable in the Myspoti store, add the `myspoti-extension` topic in the repository's **About → Topics** settings. Store discovery may take up to six hours.
+Open the extension's own page, enter `学习`, and tap **Look up**. It should show `xué xí — to study; to learn`. This checks the extension page bridge only; it does not add lookups to the lyrics screen.
 
-## Validation
+## What would be needed next
 
-The manifest follows the current Myspoti extension API shape: root `manifest.json`, `main.js`, an immutable reverse-domain id, `versionCode`, and an action with an install-visible reason. The page hook returns `{ title, html }`; the message hook receives the page's JSON request and returns the result through Myspoti's documented page bridge.
-
-The extension has not yet been installed or run inside Myspoti. The next check is to run `myspoti-ext check .` from a local checkout, then install from the repository address and exercise the three lookups above.
+If lyric taps produce usable seek events, the extension would still need word timings for the exact lyrics shown to identify the selected word. If not, the current extension API has no direct callback for taps on lyric words. Either way, this diagnostic will tell us before we build further.
 
 ## References
 
 - [Myspoti extension template](https://github.com/kota-zo/myspoti-extension-template)
 - [Myspoti extension API](https://github.com/kota-zo/myspoti/blob/main/docs/extensions/API.md)
-- [Myspoti extension discovery and publishing](https://github.com/kota-zo/myspoti-extensions#how-extensions-are-found)
-
-## License
-
-No license file has been added yet. Add one before redistributing or publishing a release package.
+- [Myspoti extension guide](https://github.com/kota-zo/myspoti/blob/main/docs/extensions/GUIDE.md)
