@@ -106,3 +106,15 @@ myspoti.provide("message", function (message) {
     meaning: entry.meaning
   };
 });
+
+myspoti.on("playback", function (event) {
+  if (!event || event.type !== "seek") return;
+  var track = event.track || {};
+  myspoti.log(
+    "LYRIC_SEEK_TEST",
+    track.title || "unknown track",
+    track.artist || "unknown artist",
+    "positionMs=" + event.positionMs,
+    "reason=" + event.reason
+  );
+});
