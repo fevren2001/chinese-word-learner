@@ -107,14 +107,53 @@ myspoti.provide("message", function (message) {
   };
 });
 
+var cachedLyricsUri = null;
+var cachedLyrics = null;
+
 myspoti.on("playback", function (event) {
   if (!event || event.type !== "seek") return;
   var track = event.track || {};
-  myspoti.log(
-    "LYRIC_SEEK_TEST",
-    track.title || "unknown track",
-    track.artist || "unknown artist",
-    "positionMs=" + event.positionMs,
-    "reason=" + event.reason
-  );
+  if (!track.uri) {
+    myspoti.log("LYRIC_TAP_NO_TRACK_URI");
+    return;
+  }
+
+  try {
+    if (cachedLyricsUri !== track.uri) {
+      cachedLyrics = myspoti.spotify.extras.lyrics(track.uri);
+      cachedLyricsUri = track.uri;
+    }
+
+    var best = null;
+    var lines = cachedLyrics && cachedLyrics.lines;
+    if (lines) {
+      for (var i = 0; i < lines.length; i++) {
+        var words = lines[i] && lines[i].words;
+        if (!words) continue;
+        for (var j = 0; j < words.length; j++) {
+          var word = words[j];
+          if (!word || typeof word.startMs !== "number" || typeof word.text !== "string") continue;
+          var delta = Math.abs(word.startMs - event.positionMs);
+          if (!best || delta < best.delta) {
+            best = { text: word.text, startMs: word.startMs, delta: delta };
+          }
+        }
+      }
+    }
+
+    if (!best) {
+      myspoti.log("LYRIC_TAP_NO_WORD_TIMING", track.title || "unknown track", "positionMs=" + event.positionMs);
+      return;
+    }
+    myspoti.log(
+      "LYRIC_TAP_GUESS",
+      track.title || "unknown track",
+      "word=" + best.text,
+      "seekMs=" + event.positionMs,
+      "wordMs=" + best.startMs,
+      "deltaMs=" + best.delta
+    );
+  } catch (error) {
+    myspoti.log("LYRIC_TAP_LOOKUP_ERROR", track.title || "unknown track", String(error));
+  }
 });
