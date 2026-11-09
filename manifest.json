@@ -1,15 +1,19 @@
 {
   "id": "io.github.fevren2001.chinesewordlearner",
   "name": "Chinese Word Learner",
-  "version": "1.1.0",
-  "versionCode": 2,
+  "version": "1.2.0",
+  "versionCode": 3,
   "apiVersion": 1,
   "author": "fevren2001",
-  "description": "A small Chinese vocabulary lookup page and lyric-seek diagnostic.",
+  "description": "A Chinese vocabulary prototype that matches lyric-tap seeks to Spotify word timings.",
   "homepage": "https://github.com/fevren2001/chinese-word-learner",
   "main": "main.js",
   "category": "look",
-  "tags": ["chinese", "vocabulary", "learning"],
+  "tags": [
+    "chinese",
+    "vocabulary",
+    "learning"
+  ],
   "actions": [
     {
       "name": "webview.page",
@@ -18,6 +22,10 @@
     {
       "name": "playback.events",
       "why": "Checks whether lyric word taps produce playback seek events."
+    },
+    {
+      "name": "spotify.catalog",
+      "why": "Reads Spotify lyric word timings to identify the tapped word."
     }
   ]
 }
